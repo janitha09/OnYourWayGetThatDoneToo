@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+        <meta charset="utf-8">
+        <title>On Your Way</title>
+        <!--<link href="/maps/documentation/javascript/examples/default.css" rel="stylesheet">-->
+
+        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=true&libraries=places"></script>
+        <script type="text/javascript" src="https://dl.dropbox.com/u/65661364/PlaceWrapper.js"></script>
+        <script type="text/javascript" src="https://dl.dropbox.com/u/65661364/GoogleCalendarWrapper.js"></script>
+        <script type="text/javascript" src="https://dl.dropbox.com/u/65661364/GoogleAuthenticationWrapper.js"></script>
+        <script type="text/javascript" src="https://apis.google.com/js/client.js"></script>
+        <script type="text/javascript" src="https://google-maps-utility-library-v3.googlecode.com/svn/trunk/routeboxer/src/RouteBoxer.js"></script>
+        <script type="text/javascript" src="https://google-maps-utility-library-v3.googlecode.com/svn/trunk/markerwithlabel/src/markerwithlabel.js"></script>
+        <script type="text/javascript" src="https://dl.dropbox.com/u/65661364/MarkerOverlayExtension.js"></script>
+        <script type="text/javascript" src="https://dl.dropbox.com/u/65661364/ProgressMessageForUser.js"></script>
+        <script type="text/javascript" src="https://dl.dropbox.com/u/65661364/EmptyFields.js"></script>
+        <script type="text/javascript" src="https://dl.dropbox.com/u/65661364/date.js"></script>
+        <script type="text/javascript" src="https://dl.dropbox.com/u/65661364/FunctionModifier.js"></script>
+        <script type="text/javascript" src="https://dl.dropboxusercontent.com/u/65661364/Boxes.js"></script>
+        <script type="text/javascript" src="https://dl.dropboxusercontent.com/u/65661364/ConditionalFormatting.js"></script>
+        <script type="text/javascript" src="https://dl.dropbox.com/u/65661364/directions.js"></script>
+        <style type="text/css">
+            img.normal{
+                height:40%;
+            }
+            #infowindowimage{
+                height:40%
+            }
+            #infowindowname{
+                color: #000; 
+                font-size: x-large;
+            }
+            #infowindowaddress{
+                color: #666666; 
+                font-size: small;
+                font-family: serif;
+            }
+            html, body, #map_canvas {
+                margin: 0;
+                padding: 0;
+                height: 100%;
+            }
+
+            .button-selected, .dropdown {
+                cursor: pointer;
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                text-align: center;
+                position: relative;
+                font-family: Arial, sans-serif;
+                font-size: 13px;
+                box-shadow: rgba(0, 0, 0, 0.4) 0 2px 4px;
+                -moz-box-shadow: rgba(0, 0, 0, 0.4) 0 2px 4px;
+                -webkit-box-shadow: rgba(0, 0, 0, 0.4) 0 2px 4px;
+                color: #000;
+                border: 1px solid #717B87;
+                background-color: #fff;
+            }
+
+            .button-selected {  
+                padding-left: 5px;
+                padding-right: 15px;
+                padding-bottom: 3px;
+                alignment-adjust: auto;
+            }
+            .button-selected {
+                font-weight: bold;
+            }
+
+            #dropdown-holder {
+                direction: ltr; 
+                overflow-x: hidden; 
+                overflow-y: hidden; 
+                text-align: left; 
+                font-family: Arial, sans-serif; 
+                -webkit-user-select: none; 
+                font-size: 13px; 
+                padding-top: 6px; 
+                padding-right: 6px; 
+                /*padding-bottom: 1px;*/ 
+                -webkit-box-shadow: rgba(0, 0, 0, 0.398438) 0px 2px 4px; 
+                box-shadow: rgba(0, 0, 0, 0.398438) 0px 2px 4px; 
+                color: rgb(0, 0, 0); 
+                padding-left: 6px;
+                padding-bottom: 6px;
+                font-weight: bold;     
+                z-index: 2;
+            }
+            .dropdown {              
+                position: relative;
+            }
+
+            .dropdown-item {
+                padding: 1px 1px 1px 1px;
+            }
+
+            .dropdown-item:hover {
+                background: #ebebeb;
+            }
+            .dropDownArrow{
+                -webkit-user-select: none;
+                margin-left: 3px;
+                position: absolute; 
+                top: 50%;
+            }
+            #warnings_panel
+            {
+                width: fit-content;
+                height: fit-content;
+                text-align: left;
+                padding: auto;
+                margin: auto;
+                color: #528CE0; 
+                background-color: #D2E0E6;
+                border: white;
+                display: none
+            }
+            .labels {
+                color: #710909;
+                background-color: white;
+                font-family: "Lucida Grande", "Arial", sans-serif;
+                font-size: 10px;
+                font-weight: normal;
+                text-align: center;
+                width: fit-content;
+                border: 1px solid black;
+                white-space: nowrap;
+            }
+        </style>
+        <!--http://stackoverflow.com/questions/6396627/add-custom-control-to-a-google-map-thats-a-dropdown-->
+
+    </head>
+    <body>
+        <!--                <div style="text-align:center">
+                                        <b>Start: </b>
+                                        <select id="start">
+                                            <option value="6416, East Lake Sammamish Pkwy NE, Redmond, WA 98052">Home</option>
+                                        </select>
+                                        <b>End: </b>
+                                        <select id="end">
+                                            <option value="10865 Willows Rd NE, Redmond, WA 98052">Work</option>
+                                        </select>
+                            <form action="#" name="the_form"> 
+                                <table id="todoItems"></table>
+                                <input type="text" id="startAddress" name="startAddress" placeholder="Starting Address" style="width: 300px;" />
+                                <input type="text" id="destAddress" name="destAddress" placeholder="Destination Address" style="width: 300px;" />
+                                <input type="number" id="distance" name="distance" style="width: 300px;"/>
+                                <input type="date" id="startTime" name="startTime" style="width: 300px;"/>
+                                <input type="date" id="endTime" name="endTime" style="width: 300px;"/>
+                                <input type="button" id="todo_btn" value="Submit"/>
+                            </form>
+                        </div>-->
+        <div title ="Progress messages" id="warnings_panel">
+            <script type="text/javascript">
+                var query = window.location.search.substring(1).split('=');
+                if (query[0] === "log") {
+                    document.getElementById('warnings_panel').style.display = 'block';
+                }
+            </script>
+        </div>
+        <div id="map_canvas"></div>      
+        <div id="dropdown-holder">
+            <div class="button-selected" 
+                 onclick="(document.getElementById('myddOptsDiv').style.display == 'none') ? document.getElementById('myddOptsDiv').style.display = 'block' : document.getElementById('myddOptsDiv').style.display = 'none';">
+                Addresses,Distance,Dates
+                <img class="dropDownArrow" src="http://maps.gstatic.com/mapfiles/arrow-down.png"/>
+            </div>
+            <div class="dropdown" id="myddOptsDiv">
+                <!--          <form action="#" name="the_form"> 
+                                <table id="todoItems"></table>
+                                <input type="text" id="startAddress" name="startAddress" placeholder="Starting Address" style="width: 300px;" />
+                                <input type="text" id="destAddress" name="destAddress" placeholder="Destination Address" style="width: 300px;" />
+                                <input type="number" id="distance" name="distance" style="width: 300px;"/>
+                                <input type="date" id="startTime" name="startTime" style="width: 300px;"/>
+                                <input type="date" id="endTime" name="endTime" style="width: 300px;"/>
+                                <input type="button" id="todo_btn" value="Submit"/>
+                            </form>-->
+                <div class="dropdown-item"><input type="text" id="startAddress" name="startAddress" placeholder="Starting Location"/></div>
+                <div class="dropdown-item"><input type="text" id="destAddress" name="destAddress" placeholder="Ending Location"/></div>
+                <div title ="search distance from path" class="dropdown-item"><input type="number" id="distance" name="distance"/></div>
+                <div title ="calendar search start date" class="dropdown-item"><input type="date" id="startTime" name="startTime"/></div>
+                <div title ="calendar search end date" class="dropdown-item"><input type="date" id="endTime" name="endTime"/></div>
+                <div class="dropdown-item"><input type="button" id="todo_btn" value="Submit"/></div>
+            </div>
+        </div>
+    </body>
+</html>
